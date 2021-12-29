@@ -4,7 +4,12 @@ html, body {
 body {
 	margin: 0;
 	overflow: hidden;
+	background: #eee;
 }
 canvas {
 	background: white;
+	touch-action: none;
+}
+#mobile-input {
+	transform: translateX(-100%) scale(0);
 }

@@ -4,6 +4,7 @@ const socket = new WebSocket(socketUrl);
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
 const debounceTimeouts = {};
+const mobileInput = document.getElementById("mobile-input");
 
 const cursor = {
 	x: null,
@@ -40,11 +41,14 @@ const data = {
 	}
 };
 
-canvas.addEventListener("mousedown", mouseDown);
-canvas.addEventListener("mouseup", mouseUp);
-canvas.addEventListener("mousemove", mouseMove);
+canvas.addEventListener("pointerdown", mouseDown);
+canvas.addEventListener("pointerup", mouseUp);
+canvas.addEventListener("pointermove", mouseMove);
 window.addEventListener("resize", () => debounce(resizeCanvas));
 window.addEventListener("keydown", keyDown);
+if(navigator.maxTouchPoints > 0) {
+	document.body.classList.add("mobile");
+}
 
 function debounce(callback) {
 	if(debounceTimeouts[callback.name]) {
@@ -63,6 +67,11 @@ function debounce(callback) {
 function resizeCanvas() {
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
+	if(document.body.classList.contains("mobile")) {
+		mobileInput.focus();
+	}
+	else {
+	}
 	ctx.font = "20px monospace";
 }
 
@@ -73,9 +82,11 @@ function mouseDown(e) {
 
 	mouse.down.x = e.clientX;
 	mouse.down.y = e.clientY;
+	mouse.x = mouse.down.x;
+	mouse.y = mouse.down.y;
 }
 
-function mouseUp() {
+function mouseUp(e) {
 	if(Math.abs(mouse.x - mouse.down.x) < grid.width / 2 && Math.abs(mouse.y - mouse.down.y) < grid.height / 2) {
 		click(
 			Math.floor( mouse.x / grid.width) + Math.ceil(camera.x / grid.width),
@@ -83,10 +94,14 @@ function mouseUp() {
 		);
 	}
 	mouse.down = false;
+	if(document.body.classList.contains("mobile")) {
+		mobileInput.focus();
+	}
 }
 
 function mouseMove(e) {
 	if(mouse.down) {
+		console.log(mouse.x - e.clientX);
 		let dragVector = {
 			x: mouse.x - e.clientX,
 			y: mouse.y - e.clientY,
