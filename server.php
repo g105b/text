@@ -183,7 +183,7 @@ class Server {
 			$header = pack("CCn", $b1, 126, $length);
 		}
 		else {
-			$header = pack("CCNN", $b1, 127, $length);
+			$header = pack("CCN", $b1, 127, $length);
 		}
 
 		return $header . $socketData;
