@@ -61,7 +61,7 @@ class Server {
 				: microtime(true) - $lastTime;
 			$this->totalTime += $deltaTime;
 			$lastTime = microtime(true);
-			$this->tick($deltaTime, $onConnect, $onData, $getData);
+			$this->tick($onConnect, $onData, $getData);
 			usleep($this->frameDelay * 1_000_000);
 		}
 	}
@@ -78,7 +78,6 @@ class Server {
 	 * no data to process.
 	 */
 	private function tick(
-		float $dt,
 		?callable $onConnect,
 		?callable $onData,
 		?callable $getData,
@@ -177,13 +176,17 @@ class Server {
 		$b1 = 0x80 | (0x1 & 0x0f);
 		$length = strlen($socketData);
 
-		if($length <= 125)
-			$header = pack('CC', $b1, $length);
-		elseif($length > 125 && $length < 65536)
-			$header = pack('CCn', $b1, 126, $length);
-		elseif($length >= 65536)
-			$header = pack('CCNN', $b1, 127, $length);
-		return $header.$socketData;
+		if($length <= 125) {
+			$header = pack("CC", $b1, $length);
+		}
+		elseif($length < 65536) {
+			$header = pack("CCn", $b1, 126, $length);
+		}
+		else {
+			$header = pack("CCNN", $b1, 127, $length);
+		}
+
+		return $header . $socketData;
 	}
 
 	/** @return array<string> */
@@ -247,7 +250,7 @@ class Server {
 			"Upgrade: websocket\r\n" .
 			"Connection: Upgrade\r\n" .
 			"WebSocket-Origin: $address\r\n" .
-			"WebSocket-Location: ws://$address:$port/demo/shout.php\r\n".
+			"WebSocket-Location: ws://$address:$port/ws.php\r\n".
 			"Sec-WebSocket-Accept:$secAccept\r\n\r\n";
 
 		socket_write(

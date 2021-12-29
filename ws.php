@@ -5,15 +5,14 @@ require("state.php");
 require("canvas.php");
 
 $db = new PDO("sqlite:text.db");
-$null = null;
+if(empty($db->query("select `name` FROM `sqlite_schema` where `type` = 'table'")->fetchAll())) {
+	$db->exec(file_get_contents("db.sql"));
+	echo "Database created.", PHP_EOL;
+}
 
 $ws = new Server("0.0.0.0", 10500);
-
-$st = microtime(true);
-$lt = null;
-$t = 0;
-
-$sendFunction = fn(Socket $client, object|string $data) => $ws->send($client, $data);
+$sendFunction = fn(Socket $client, object|string $data)
+	=> $ws->send($client, $data);
 
 $canvas = new Canvas();
 $state = new State($db, $canvas);

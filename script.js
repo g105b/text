@@ -1,12 +1,9 @@
+const socketUrl = `ws://${location.hostname}:10500/ws.php`;
+const socket = new WebSocket(socketUrl);
+
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
 const debounceTimeouts = {};
-
-canvas.addEventListener("mousedown", mouseDown);
-canvas.addEventListener("mouseup", mouseUp);
-canvas.addEventListener("mousemove", mouseMove);
-window.addEventListener("resize", e => debounce(resizeCanvas));
-window.addEventListener("keydown", keyDown);
 
 const cursor = {
 	x: null,
@@ -43,6 +40,12 @@ const data = {
 	}
 };
 
+canvas.addEventListener("mousedown", mouseDown);
+canvas.addEventListener("mouseup", mouseUp);
+canvas.addEventListener("mousemove", mouseMove);
+window.addEventListener("resize", () => debounce(resizeCanvas));
+window.addEventListener("keydown", keyDown);
+
 function debounce(callback) {
 	if(debounceTimeouts[callback.name]) {
 		return;
@@ -72,7 +75,7 @@ function mouseDown(e) {
 	mouse.down.y = e.clientY;
 }
 
-function mouseUp(e) {
+function mouseUp() {
 	if(Math.abs(mouse.x - mouse.down.x) < grid.width / 2 && Math.abs(mouse.y - mouse.down.y) < grid.height / 2) {
 		click(
 			Math.floor( mouse.x / grid.width) + Math.ceil(camera.x / grid.width),
@@ -103,7 +106,7 @@ function keyDown(e) {
 
 	e.preventDefault();
 
-	if(e.key.length === 1 && e.key.match(/[a-z0-9!"£$€ß¢%^&*()-=_+\[\]{};:'@#~,<.>/?\\|`¬ ]/i)) {
+	if(e.key.length === 1 && e.key.match(/[a-z0-9!"£$€ß¢%^&*()\-=_+\[\]{};:'@#~,<.>/?\\|`¬ ]/i)) {
 		setChar(cursor.x, cursor.y, e.key[0]);
 		cursor.x++;
 	}
@@ -189,10 +192,6 @@ function select(x, y) {
 	send(x, y);
 }
 
-function unselect() {
-	cursor.x = cursor.y = null;
-}
-
 function loop(dt) {
 	update(dt);
 	draw(dt);
@@ -203,7 +202,7 @@ function update(dt) {
 
 }
 
-function draw(dt) {
+function draw() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	drawSelection();
 	drawData();
@@ -268,32 +267,23 @@ resizeCanvas();
 camera.x -= Math.floor(canvas.width / 2);
 camera.y -= Math.floor(canvas.height / 2);
 
-var socketUrl = `ws://${location.hostname}:10500/ws.php`;
-var socket = new WebSocket(socketUrl);
 socket.onmessage = function(e) {
 	let obj = JSON.parse(e.data);
-	switch(obj.type) {
-	case "update":
-		for(let i in obj.data) {
-			if(!obj.data.hasOwnProperty(i)) {
-				continue;
-			}
-
-			let y = i.toString();
-
-			for(let j in obj.data[i]) {
-				let x = j.toString();
-
-				if(!data[y]) {
-					data[y] = {};
-				}
-				data[y][x] = obj.data[i][j];
-			}
+	for(let i in obj.data) {
+		if(!obj.data.hasOwnProperty(i)) {
+			continue;
 		}
-		break;
-	default:
-		console.log(e.data);
-		break;
+
+		let y = i.toString();
+
+		for(let j in obj.data[i]) {
+			let x = j.toString();
+
+			if(!data[y]) {
+				data[y] = {};
+			}
+			data[y][x] = obj.data[i][j];
+		}
 	}
 };
 

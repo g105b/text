@@ -1,7 +1,7 @@
 select
 	max(t) as t,
-	x,
-	y,
+	text.x,
+	text.y,
 	c
 from
 	text
