@@ -7,7 +7,7 @@ The concept: a WebSocket server that communicates state between all connected cl
 
 The human condition: I am fully aware that this will be abused, because I wanted to keep the communication channels completely anonymous. It would be impossible to censor input completely anyway, so let's just see what mess this will produce. Wait, it's not mess - it's **art**.
 
-You can view the live project at: https://www.walloftext.art
+~~You can view the live project at: https://www.walloftext.art~~ I had to take the service offline due to abuse, but I'll bring it back one rainy day.
 
 Getting set up.
 ---------------
